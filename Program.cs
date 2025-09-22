@@ -1,12 +1,11 @@
-using TaskWeb.Models;
-
-Tag tag = new Tag();
-tag.SetTitle("Estudo");
-Console.Write(tag.GetTitle());
-
+// Builder
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddControllers();
+
+// App
 var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!?");
+app.MapControllerRoute("default", "{controller=tag}/{action=index}");
 
 app.Run();
