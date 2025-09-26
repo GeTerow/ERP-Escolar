@@ -1,0 +1,19 @@
+@model List<TaskWeb.Models.Tag>
+
+<html>
+    <body>
+        <h1>Lista de Tags</h1>
+        <p>@Model.Count</p>
+
+        <table>
+
+            @foreach(var tag in Model) {
+            <tr>
+                <td>@tag.TagId</td>
+                <td>@tag.Title</td>
+            </tr>
+            }
+
+        </table>
+    </body>
+</html>
