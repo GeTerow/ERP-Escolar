@@ -5,14 +5,27 @@ namespace TaskWeb.Controllers;
 
 public class TagController : Controller
 {
+    static List<Tag> lista = new List<Tag>();
+
     public ActionResult Index()
     {
-        List<Tag> lista = new List<Tag>();
-        lista.Add(new Tag { TagId = 1, Title = "Estudo" });
-        lista.Add(new Tag { TagId = 2, Title = "Trabalho" });
-        lista.Add(new Tag { TagId = 3, Title = "Jogos" });
-        lista.Add(new Tag { TagId = 3, Title = "Família" });
-
         return View(lista);
+    }
+
+    [HttpGet]
+    public ActionResult Create()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    public ActionResult Create(Tag tag)
+    {
+        //string title = form["Title"];
+        //Tag tag = new Tag();
+        //tag.Title = title;
+
+        lista.Add(tag);
+        return RedirectToAction("Index");
     }
 }
