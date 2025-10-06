@@ -1,15 +1,22 @@
 using Microsoft.AspNetCore.Mvc;
 using TaskWeb.Models;
+using TaskWeb.Repositories;
 
 namespace TaskWeb.Controllers;
 
 public class TagController : Controller
 {
-    static List<Tag> lista = new List<Tag>();
+
+    private ITagRepository repository;
+
+    public TagController(ITagRepository repository)
+    {
+        this.repository = repository;
+    }
 
     public ActionResult Index()
     {
-        return View(lista);
+        return View(repository.Read());
     }
 
     [HttpGet]
@@ -25,7 +32,7 @@ public class TagController : Controller
         //Tag tag = new Tag();
         //tag.Title = title;
 
-        lista.Add(tag);
+        repository.Create(tag);
         return RedirectToAction("Index");
     }
 }
