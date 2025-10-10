@@ -16,7 +16,15 @@ public class TagMemoryRepository : ITagRepository
 
     public void Delete(int id)
     {
-        throw new NotImplementedException();
+        // SELECT * FROM lista WHERE TagId = id
+        // var tags = from item in lista
+        //            where item.TagId == id
+        //            select item;
+
+        // var tag = tags.Single();
+
+        var tag = lista.SingleOrDefault((e) => e.TagId == id);
+        lista.Remove(tag);
     }
 
     public List<Tag> Read()
@@ -26,11 +34,12 @@ public class TagMemoryRepository : ITagRepository
 
     public Tag Read(int id)
     {
-        throw new NotImplementedException();
+        return lista.SingleOrDefault((e) => e.TagId == id);
     }
 
     public void Update(Tag tag)
     {
-        throw new NotImplementedException();
+        var _tag = lista.SingleOrDefault((e) => e.TagId == tag.TagId);
+        _tag.Title = tag.Title;
     }
 }

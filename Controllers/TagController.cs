@@ -35,4 +35,26 @@ public class TagController : Controller
         repository.Create(tag);
         return RedirectToAction("Index");
     }
+
+    public ActionResult Delete(int id)
+    {
+        repository.Delete(id);
+        return RedirectToAction("Index");
+    }
+
+    [HttpGet]
+    public ActionResult Update(int id)
+    {
+        var tag = repository.Read(id);
+        return View(tag);
+    }
+
+    [HttpPost]
+    public ActionResult Update(int id, Tag tag)
+    {
+        tag.TagId = id;
+        repository.Update(tag);
+
+        return RedirectToAction("Index");
+    }
 }
