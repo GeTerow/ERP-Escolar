@@ -3,7 +3,11 @@ using TaskWeb.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSingleton<ITagRepository>(new TagMemoryRepository());
+// builder.Services.AddSingleton<ITagRepository>(new TagMemoryRepository());
+builder.Services.AddTransient<ITagRepository>(option => 
+    new TagDatabaseRepository(
+        builder.Configuration.GetConnectionString("default")));
+
 builder.Services.AddControllersWithViews();
 
 // App
