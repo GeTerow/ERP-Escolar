@@ -27,13 +27,13 @@ public class UsuarioController : Controller
         if (usuario == null)
         {
             ViewBag.Error = "Usuário ou senha inválidos";
-            return View();
+            return View(model);
         }
 
         HttpContext.Session.SetInt32("UsuarioId", usuario.UsuarioId);
         HttpContext.Session.SetString("Nome", usuario.Nome);
 
-        return RedirectToAction("Tarefa", "Index");
+        return RedirectToAction("Index", "Tarefa");
     }
 
     public ActionResult Logout()

@@ -13,6 +13,8 @@
                 @foreach(var tag in ViewBag.Tags) { 
                     <option value="@tag.TagId" @(tag.TagId == Model.TagId ? "selected" : "")>@tag.Title</option>
                 }
+            </select>
+            <br/>
             <button class="btn btn-primary">Salvar</button>
         </form>
     </body>

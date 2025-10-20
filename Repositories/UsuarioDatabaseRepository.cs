@@ -16,8 +16,8 @@ public class UsuarioDatabaseRepository : DbConnection, IUsuarioRepository
         SqlCommand cmd = new SqlCommand();
         cmd.Connection = conn;
         cmd.CommandText = "SELECT * FROM Usuario WHERE Email = @email AND Senha = @senha";
-        cmd.Parameters.AddWithValue("email", email);
-        cmd.Parameters.AddWithValue("senha", senha);
+        cmd.Parameters.AddWithValue("email", model.Email);
+        cmd.Parameters.AddWithValue("senha", model.Senha);
 
         SqlDataReader reader = cmd.ExecuteReader();
 
@@ -27,7 +27,7 @@ public class UsuarioDatabaseRepository : DbConnection, IUsuarioRepository
             {
                 UsuarioId = (int)reader["UsuarioId"],
                 Email = (string)reader["Email"],
-                Nome = (int)reader["Nome"]
+                Nome = (string)reader["Nome"]
             };
         }
 

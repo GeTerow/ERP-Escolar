@@ -8,28 +8,33 @@ public class TarefaController : Controller
 {
 
     private ITarefaRepository repository;
+    private ITagRepository tagRepository;
     private int usuarioId;
 
-    public TarefaController(ITarefaRepository repository)
+    public TarefaController(ITarefaRepository repository, ITagRepository tagRepository)
     {
         this.repository = repository;
-        usuarioId = HttpContext.Session.GetInt32("UsuarioId");
+        this.tagRepository = tagRepository;
+        
     }
 
     public ActionResult Index()
     {
-        return View(repository.Read(usuarioId));
+        var usuarioId = (int)HttpContext.Session.GetInt32("UsuarioId");
+        return View(repository.ReadAll(usuarioId));
     }
 
     [HttpGet]
     public ActionResult Create()
     {
+        ViewBag.Tags = tagRepository.Read();
         return View();
     }
 
     [HttpPost]
     public ActionResult Create(Tarefa model)
     {
+        var usuarioId = (int)HttpContext.Session.GetInt32("UsuarioId");
         model.UsuarioId = usuarioId;
 
         repository.Create(model);
@@ -46,13 +51,14 @@ public class TarefaController : Controller
     public ActionResult Update(int id)
     {
         var Tarefa = repository.Read(id);
+        ViewBag.Tags = tagRepository.Read();
         return View(Tarefa);
     }
 
     [HttpPost]
     public ActionResult Update(int id, Tarefa model)
     {
-        Tarefa.TarefaId = id;
+        model.TarefaId = id;
         repository.Update(model);
 
         return RedirectToAction("Index");

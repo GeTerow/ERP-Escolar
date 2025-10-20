@@ -32,7 +32,7 @@ public class TarefaDatabaseRepository : DbConnection, ITarefaRepository
         cmd.ExecuteNonQuery();
     }
 
-    public List<Tarefa> Read(int usuarioId)
+    public List<Tarefa> ReadAll(int usuarioId)
     {
         List<Tarefa> lista = new List<Tarefa>();
 
