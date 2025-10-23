@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:latest
+    container_name: sqlserver_instance
+    environment:
+      # 1. Define a edição do SQL Server. Exemplos: 'Developer', 'Express', 'Standard', 'Enterprise'
+      # 'Developer' é gratuita para desenvolvimento/teste.
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=SuaSenhaForteAqui! # <-- MUITO IMPORTANTE: Substitua por uma senha forte!
+      - MSSQL_PID=Developer
+    ports:
+      # Mapeia a porta padrão do SQL Server (1433) no container para uma porta na sua máquina host.
+      - "1433:1433"  # <-- Altere o '1433' da esquerda se a porta já estiver em uso no seu host.
+    volumes:
+      # Persiste os dados do banco de dados em um volume nomeado para que não sejam perdidos ao remover o container.
+      - mssql_data:/var/opt/mssql
+    restart: unless-stopped
+    healthcheck:
+      # Verifica se o SQL Server iniciou corretamente
+      test: ["CMD", "sqlcmd", "-S", "localhost", "-U", "sa", "-P", "SuaSenhaForteAqui!", "-Q", "SELECT 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+volumes:
+  mssql_data:
+    driver: local

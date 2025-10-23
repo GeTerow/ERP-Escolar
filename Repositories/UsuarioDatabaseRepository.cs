@@ -1,6 +1,5 @@
 namespace TaskWeb.Repositories;
 
-using System.Collections.Generic;
 using TaskWeb.Models;
 using Microsoft.Data.SqlClient;
 
@@ -11,7 +10,7 @@ public class UsuarioDatabaseRepository : DbConnection, IUsuarioRepository
         
     }
 
-    public Usuario Login(LoginViewModel model)
+    public Usuario? Login(LoginViewModel model)
     {
         SqlCommand cmd = new SqlCommand();
         cmd.Connection = conn;

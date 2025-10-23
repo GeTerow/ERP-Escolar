@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskWeb.Models;
 using TaskWeb.Repositories;
@@ -6,8 +7,7 @@ namespace TaskWeb.Controllers;
 
 public class UsuarioController : Controller
 {
-
-    private IUsuarioRepository repository;
+    private readonly IUsuarioRepository repository;
 
     public UsuarioController(IUsuarioRepository repository)
     {
@@ -22,18 +22,29 @@ public class UsuarioController : Controller
     [HttpPost]
     public ActionResult Login(LoginViewModel model)
     {
-        Usuario usuario = repository.Login(model);
+        if (string.IsNullOrWhiteSpace(model.Email))
+        {
+            ViewBag.Error = "Informe o email.";
+            return View(model);
+        }
+        if (string.IsNullOrWhiteSpace(model.Senha))
+        {
+            ViewBag.Error = "Informe a senha.";
+            return View(model);
+        }
+
+        var usuario = repository.Login(model);
 
         if (usuario == null)
         {
-            ViewBag.Error = "Usuário ou senha inválidos";
+            ViewBag.Error = "Usuario ou senha invalidos";
             return View(model);
         }
 
         HttpContext.Session.SetInt32("UsuarioId", usuario.UsuarioId);
         HttpContext.Session.SetString("Nome", usuario.Nome);
 
-        return RedirectToAction("Index", "Tarefa");
+        return RedirectToAction("Index", "Home");
     }
 
     public ActionResult Logout()

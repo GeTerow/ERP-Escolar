@@ -4,5 +4,5 @@ using TaskWeb.Models;
 
 public interface IUsuarioRepository
 {
-    Usuario Login(LoginViewModel model);
+    Usuario? Login(LoginViewModel model);
 }
