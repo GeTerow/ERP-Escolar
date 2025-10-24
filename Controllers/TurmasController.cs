@@ -7,7 +7,7 @@ namespace TaskWeb.Controllers;
 
 public class TurmasController : BaseController
 {
-    private readonly ITurmaRepository _turmaRepository;
+    private ITurmaRepository _turmaRepository;
 
     public TurmasController(ITurmaRepository turmaRepository)
     {

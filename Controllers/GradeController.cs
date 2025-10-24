@@ -8,8 +8,8 @@ namespace TaskWeb.Controllers;
 
 public class GradeController : BaseController
 {
-    private readonly IGradeRepository _gradeRepository;
-    private readonly ITurmaRepository _turmaRepository;
+    private IGradeRepository _gradeRepository;
+    private ITurmaRepository _turmaRepository;
 
     public GradeController(
         IGradeRepository gradeRepository,

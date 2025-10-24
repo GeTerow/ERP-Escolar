@@ -7,9 +7,9 @@ namespace TaskWeb.Controllers;
 
 public class MateriasController : BaseController
 {
-    private readonly IMateriaRepository _materiaRepository;
-    private readonly ITurmaRepository _turmaRepository;
-    private readonly IProfessorRepository _professorRepository;
+    private IMateriaRepository _materiaRepository;
+    private ITurmaRepository _turmaRepository;
+    private IProfessorRepository _professorRepository;
 
     public MateriasController(
         IMateriaRepository materiaRepository,

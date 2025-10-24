@@ -7,8 +7,8 @@ namespace TaskWeb.Controllers;
 
 public class AlunosController : BaseController
 {
-    private readonly IAlunoRepository _alunoRepository;
-    private readonly ITurmaRepository _turmaRepository;
+    private IAlunoRepository _alunoRepository;
+    private ITurmaRepository _turmaRepository;
 
     public AlunosController(IAlunoRepository alunoRepository, ITurmaRepository turmaRepository)
     {

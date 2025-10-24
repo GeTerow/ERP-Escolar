@@ -7,7 +7,7 @@ namespace TaskWeb.Controllers;
 
 public class ProfessoresController : BaseController
 {
-    private readonly IProfessorRepository _professorRepository;
+    private IProfessorRepository _professorRepository;
 
     public ProfessoresController(IProfessorRepository professorRepository)
     {

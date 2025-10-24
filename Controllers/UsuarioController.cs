@@ -7,7 +7,7 @@ namespace TaskWeb.Controllers;
 
 public class UsuarioController : Controller
 {
-    private readonly IUsuarioRepository repository;
+    private IUsuarioRepository repository;
 
     public UsuarioController(IUsuarioRepository repository)
     {
