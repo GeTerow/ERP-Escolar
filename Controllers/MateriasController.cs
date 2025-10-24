@@ -160,11 +160,18 @@ public class MateriasController : BaseController
         {
             return RedirectToAction("Login", "Usuario");
         }
+        try
+        {
+            _materiaRepository.Delete(id);
+            TempData["Success"] = "Materia removida com sucesso.";
+            return RedirectToAction("Index");
+        }
+        catch (Exception)
+        {
+            TempData["Error"] = "Nao foi possivel remover a matéria. Tente novamente.";
+            return RedirectToAction("Index");
+        }
 
-        _materiaRepository.Delete(id);
-        TempData["Success"] = "Materia removida com sucesso.";
-
-        return RedirectToAction("Index");
     }
 
     private void PopularListas()

@@ -140,7 +140,7 @@ public class TurmasController : BaseController
         }
         catch (Exception)
         {
-            TempData["Error"] = "Nao foi possivel remover a turma. Verifique vinculos existentes.";
+            TempData["Error"] = "Nao foi possivel remover a turma.";
         }
 
         return RedirectToAction("Index");
