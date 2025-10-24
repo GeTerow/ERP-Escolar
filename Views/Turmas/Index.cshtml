@@ -57,6 +57,7 @@
                                         <td>@(string.IsNullOrEmpty(turma.AnoLetivo) ? "-" : turma.AnoLetivo)</td>
                                         <td>
                                             <a class="btn btn-outline-primary btn-sm me-2" href="/turmas/edit/@turma.TurmaId">Editar</a>
+                                            <a class="btn btn-outline-danger btn-sm" href="/turmas/delete/@turma.TurmaId">Excluir</a>
                                         </td>
                                     </tr>
                                 }
