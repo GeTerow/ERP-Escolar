@@ -8,7 +8,7 @@ services:
       # 1. Define a edição do SQL Server. Exemplos: 'Developer', 'Express', 'Standard', 'Enterprise'
       # 'Developer' é gratuita para desenvolvimento/teste.
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=SuaSenhaForteAqui! # <-- MUITO IMPORTANTE: Substitua por uma senha forte!
+      - SA_PASSWORD=SuaSenhaForteAqui!
       - MSSQL_PID=Developer
     ports:
       # Mapeia a porta padrão do SQL Server (1433) no container para uma porta na sua máquina host.

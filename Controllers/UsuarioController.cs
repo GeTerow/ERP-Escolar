@@ -7,11 +7,11 @@ namespace TaskWeb.Controllers;
 
 public class UsuarioController : Controller
 {
-    private IUsuarioRepository repository;
+    private IUsuarioRepository _usuariorepository;
 
-    public UsuarioController(IUsuarioRepository repository)
+    public UsuarioController(IUsuarioRepository usuariorepository)
     {
-        this.repository = repository;
+        _usuariorepository = usuariorepository;
     }
 
     public ActionResult Login()
@@ -33,7 +33,7 @@ public class UsuarioController : Controller
             return View(model);
         }
 
-        var usuario = repository.Login(model);
+        var usuario = _usuariorepository.Login(model);
 
         if (usuario == null)
         {
