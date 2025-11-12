@@ -5,4 +5,6 @@ public class Turma
     public int TurmaId { get; set; }
     public string Nome { get; set; } = string.Empty;
     public string AnoLetivo { get; set; } = string.Empty;
+    public int TurnoId { get; set; }
+    public string TurnoNome { get; set; } = string.Empty;
 }

@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskWeb.Models;
 using TaskWeb.Repositories;
@@ -7,11 +6,13 @@ namespace TaskWeb.Controllers;
 
 public class TurmasController : BaseController
 {
-    private ITurmaRepository _turmaRepository;
+    private readonly ITurmaRepository _turmaRepository;
+    private readonly ITurnoRepository _turnoRepository;
 
-    public TurmasController(ITurmaRepository turmaRepository)
+    public TurmasController(ITurmaRepository turmaRepository, ITurnoRepository turnoRepository)
     {
         _turmaRepository = turmaRepository;
+        _turnoRepository = turnoRepository;
     }
 
     public IActionResult Index()
@@ -32,6 +33,7 @@ public class TurmasController : BaseController
             return RedirectToAction("Login", "Usuario");
         }
 
+        CarregarTurnos();
         return View(new Turma());
     }
 
@@ -45,12 +47,20 @@ public class TurmasController : BaseController
 
         if (string.IsNullOrWhiteSpace(turma.Nome))
         {
+            CarregarTurnos();
             ViewBag.Error = "Informe o nome da turma.";
             return View(turma);
         }
         if (string.IsNullOrWhiteSpace(turma.AnoLetivo))
         {
+            CarregarTurnos();
             ViewBag.Error = "Informe o ano letivo da turma.";
+            return View(turma);
+        }
+        if (turma.TurnoId <= 0)
+        {
+            CarregarTurnos();
+            ViewBag.Error = "Selecione um turno.";
             return View(turma);
         }
 
@@ -73,6 +83,7 @@ public class TurmasController : BaseController
             return NotFound();
         }
 
+        CarregarTurnos();
         return View(turma);
     }
 
@@ -86,12 +97,20 @@ public class TurmasController : BaseController
 
         if (string.IsNullOrWhiteSpace(turma.Nome))
         {
+            CarregarTurnos();
             ViewBag.Error = "Informe o nome da turma.";
             return View(turma);
         }
         if (string.IsNullOrWhiteSpace(turma.AnoLetivo))
         {
+            CarregarTurnos();
             ViewBag.Error = "Informe o ano letivo da turma.";
+            return View(turma);
+        }
+        if (turma.TurnoId <= 0)
+        {
+            CarregarTurnos();
+            ViewBag.Error = "Selecione um turno.";
             return View(turma);
         }
 
@@ -103,6 +122,7 @@ public class TurmasController : BaseController
         }
         catch (Exception)
         {
+            CarregarTurnos();
             ViewBag.Error = "Nao foi possivel atualizar a turma. Tente novamente.";
             return View(turma);
         }
@@ -146,4 +166,11 @@ public class TurmasController : BaseController
         return RedirectToAction("Index");
     }
 
+    private void CarregarTurnos()
+    {
+        ViewBag.Turnos = _turnoRepository.ReadAll();
+    }
 }
+
+
+

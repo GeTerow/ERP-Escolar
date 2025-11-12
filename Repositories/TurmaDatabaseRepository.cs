@@ -1,6 +1,5 @@
 namespace TaskWeb.Repositories;
 
-using System;
 using Microsoft.Data.SqlClient;
 using TaskWeb.Models;
 
@@ -15,11 +14,12 @@ public class TurmaDatabaseRepository : DbConnection, ITurmaRepository
         using SqlCommand cmd = new SqlCommand();
         cmd.Connection = conn;
         cmd.CommandText = """
-            INSERT INTO Turma (Nome, AnoLetivo)
-            VALUES (@nome, @anoLetivo)
+            INSERT INTO Turma (Nome, AnoLetivo, TurnoId)
+            VALUES (@nome, @anoLetivo, @turnoId)
             """;
         cmd.Parameters.AddWithValue("nome", turma.Nome);
-        cmd.Parameters.AddWithValue("anoLetivo", (object?)turma.AnoLetivo ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("anoLetivo", turma.AnoLetivo);
+        cmd.Parameters.AddWithValue("turnoId", turma.TurnoId);
         cmd.ExecuteNonQuery();
     }
 
@@ -27,18 +27,13 @@ public class TurmaDatabaseRepository : DbConnection, ITurmaRepository
     {
         using SqlCommand cmd = new SqlCommand();
         cmd.Connection = conn;
-        cmd.CommandText = "SELECT * FROM Turma WHERE TurmaId = @id";
+        cmd.CommandText = BaseSelect() + " WHERE t.TurmaId = @id";
         cmd.Parameters.AddWithValue("id", id);
 
         using SqlDataReader reader = cmd.ExecuteReader();
         if (reader.Read())
         {
-            return new Turma
-            {
-                TurmaId = (int)reader["TurmaId"],
-                Nome = (string)reader["Nome"],
-                AnoLetivo = (string)reader["AnoLetivo"]
-            };
+            return MapTurma(reader);
         }
 
         return null;
@@ -50,21 +45,12 @@ public class TurmaDatabaseRepository : DbConnection, ITurmaRepository
 
         using SqlCommand cmd = new SqlCommand();
         cmd.Connection = conn;
-        cmd.CommandText = """
-            SELECT TurmaId, Nome, AnoLetivo
-            FROM Turma
-            ORDER BY Nome
-            """;
+        cmd.CommandText = BaseSelect() + " ORDER BY t.Nome";
 
         using SqlDataReader reader = cmd.ExecuteReader();
         while (reader.Read())
         {
-            turmas.Add(new Turma
-            {
-                TurmaId = (int)reader["TurmaId"],
-                Nome = (string)reader["Nome"],
-                AnoLetivo = (string)reader["AnoLetivo"]
-            });
+            turmas.Add(MapTurma(reader));
         }
 
         return turmas;
@@ -77,11 +63,13 @@ public class TurmaDatabaseRepository : DbConnection, ITurmaRepository
         cmd.CommandText = """
             UPDATE Turma
             SET Nome = @nome,
-                AnoLetivo = @anoLetivo
+                AnoLetivo = @anoLetivo,
+                TurnoId = @turnoId
             WHERE TurmaId = @id
             """;
         cmd.Parameters.AddWithValue("nome", turma.Nome);
         cmd.Parameters.AddWithValue("anoLetivo", turma.AnoLetivo);
+        cmd.Parameters.AddWithValue("turnoId", turma.TurnoId);
         cmd.Parameters.AddWithValue("id", turma.TurmaId);
         cmd.ExecuteNonQuery();
     }
@@ -93,5 +81,30 @@ public class TurmaDatabaseRepository : DbConnection, ITurmaRepository
         cmd.CommandText = "DELETE FROM Turma WHERE TurmaId = @id";
         cmd.Parameters.AddWithValue("id", id);
         cmd.ExecuteNonQuery();
+    }
+
+    private static string BaseSelect()
+    {
+        return """
+            SELECT t.TurmaId,
+                   t.Nome,
+                   t.AnoLetivo,
+                   t.TurnoId,
+                   tr.Nome AS TurnoNome
+            FROM Turma t
+            JOIN Turno tr ON t.TurnoId = tr.TurnoId
+            """;
+    }
+
+    private static Turma MapTurma(SqlDataReader reader)
+    {
+        return new Turma
+        {
+            TurmaId = (int)reader["TurmaId"],
+            Nome = (string)reader["Nome"],
+            AnoLetivo = (string)reader["AnoLetivo"],
+            TurnoId = (int)reader["TurnoId"],
+            TurnoNome = (string)reader["TurnoNome"]
+        };
     }
 }
