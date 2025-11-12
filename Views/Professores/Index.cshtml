@@ -39,7 +39,7 @@
                                 <th>Nome</th>
                                 <th>Email</th>
                                 <th>Telefone</th>
-                                <th style="width: 140px;">Ações</th>
+                                <th style="width: 220px;">Acoes</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -57,8 +57,9 @@
                                         <td>@professor.Nome</td>
                                         <td>@(string.IsNullOrEmpty(professor.Email) ? "-" : professor.Email)</td>
                                         <td>@(string.IsNullOrEmpty(professor.Telefone) ? "-" : professor.Telefone)</td>
-                                        <td>
-                                            <a class="btn btn-outline-primary btn-sm me-2" href="/professores/edit/@professor.ProfessorId">Editar</a>
+                                        <td class="d-flex flex-wrap gap-2">
+                                            <a class="btn btn-outline-secondary btn-sm" href="/professores/disponibilidade/@professor.ProfessorId">Disponibilidade</a>
+                                            <a class="btn btn-outline-primary btn-sm" href="/professores/edit/@professor.ProfessorId">Editar</a>
                                             <a class="btn btn-outline-danger btn-sm" href="/professores/delete/@professor.ProfessorId">Excluir</a>
                                         </td>
                                     </tr>

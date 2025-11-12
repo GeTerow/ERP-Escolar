@@ -14,7 +14,10 @@
             <div class="card shadow-sm page-card">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h1 class="h5 mb-0">Editar Professor</h1>
-                    <a class="btn btn-outline-secondary btn-sm" href="/professores"><i class="bi bi-arrow-left"></i> Voltar</a>
+                    <div class="d-flex gap-2">
+                        <a class="btn btn-outline-secondary btn-sm" href="/professores/disponibilidade/@Model.ProfessorId"><i class="bi bi-calendar-check"></i> Disponibilidade</a>
+                        <a class="btn btn-outline-secondary btn-sm" href="/professores"><i class="bi bi-arrow-left"></i> Voltar</a>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if (ViewBag.Error != null)
