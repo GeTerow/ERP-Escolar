@@ -1,22 +1,28 @@
 using System.Linq;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TaskWeb.Models;
 using TaskWeb.Repositories;
+using TaskWeb.Services;
 
 namespace TaskWeb.Controllers;
 
 public class GradeController : BaseController
 {
-    private IGradeRepository _gradeRepository;
-    private ITurmaRepository _turmaRepository;
+    private readonly IGradeRepository _gradeRepository;
+    private readonly ITurmaRepository _turmaRepository;
+    private readonly ISlotAulaRepository _slotRepository;
+    private readonly GradeGenerationService _gradeGenerationService;
 
     public GradeController(
         IGradeRepository gradeRepository,
-        ITurmaRepository turmaRepository)
+        ITurmaRepository turmaRepository,
+        ISlotAulaRepository slotRepository,
+        GradeGenerationService gradeGenerationService)
     {
         _gradeRepository = gradeRepository;
         _turmaRepository = turmaRepository;
+        _slotRepository = slotRepository;
+        _gradeGenerationService = gradeGenerationService;
     }
 
     [HttpGet]
@@ -34,35 +40,31 @@ public class GradeController : BaseController
         }
 
         int turmaSelecionada = turmaId ?? turmas[0].TurmaId;
-        var grade = _gradeRepository.ReadByTurma(turmaSelecionada);
-
-        var horarios = grade.Select(g => g.HoraInicio).Distinct().OrderBy(h => h).ToList();
-        if (horarios.Count == 0)
+        var turmaAtual = turmas.FirstOrDefault(t => t.TurmaId == turmaSelecionada) ?? turmas[0];
+        var grade = _gradeRepository.ReadByTurma(turmaAtual.TurmaId);
+        var slots = _slotRepository.ReadByTurno(turmaAtual.TurnoId).OrderBy(s => s.Sequencia).ToList();
+        if (slots.Count == 0)
         {
-            horarios = new List<TimeSpan>
-            {
-                TimeSpan.FromHours(8),
-                TimeSpan.FromHours(9),
-                TimeSpan.FromHours(10),
-                TimeSpan.FromHours(11),
-                TimeSpan.FromHours(13),
-                TimeSpan.FromHours(14)
-            };
+            slots = new List<SlotAula>();
         }
 
         List<GradeLinhaViewModel> linhas = new();
-        foreach (var horario in horarios)
+        foreach (var slot in slots)
         {
             Dictionary<int, GradeHorario?> aulasPorDia = new();
             for (int dia = 1; dia <= 5; dia++)
             {
-                var entrada = grade.FirstOrDefault(g => g.DiaSemana == dia && g.HoraInicio == horario);
+                var entrada = grade.FirstOrDefault(g => g.DiaSemana == dia && g.SlotAulaId == slot.SlotAulaId);
                 aulasPorDia[dia] = entrada;
             }
 
             linhas.Add(new GradeLinhaViewModel
             {
-                Hora = horario,
+                SlotAulaId = slot.SlotAulaId,
+                Sequencia = slot.Sequencia,
+                HoraInicio = slot.HoraInicio,
+                HoraFim = slot.HoraFim,
+                EhIntervalo = slot.EhIntervalo,
                 AulasPorDia = aulasPorDia
             });
         }
@@ -70,11 +72,52 @@ public class GradeController : BaseController
         var model = new GradeViewModel
         {
             Turmas = turmas,
-            TurmaSelecionadaId = turmaSelecionada,
+            TurmaSelecionadaId = turmaAtual.TurmaId,
             Linhas = linhas
         };
 
         return View(model);
+    }
+
+    [HttpPost]
+    public IActionResult Gerar(int turmaId)
+    {
+        if (!UsuarioLogado())
+        {
+            return RedirectToAction("Login", "Usuario");
+        }
+
+        var resultado = _gradeGenerationService.GerarParaTurma(turmaId);
+        if (!resultado.Success)
+        {
+            TempData["Error"] = string.Join(" ", resultado.Errors);
+        }
+        else
+        {
+            TempData["Success"] = $"Grade gerada com {resultado.HorariosGerados.Count} aulas.";
+        }
+
+        return RedirectToAction("Index", new { turmaId });
+    }
+
+    [HttpPost]
+    public IActionResult Limpar(int turmaId)
+    {
+        if (!UsuarioLogado())
+        {
+            return RedirectToAction("Login", "Usuario");
+        }
+
+        var turma = _turmaRepository.Read(turmaId);
+        if (turma == null)
+        {
+            TempData["Error"] = "Turma nao encontrada.";
+            return RedirectToAction("Index");
+        }
+
+        _gradeRepository.DeleteByTurma(turmaId);
+        TempData["Success"] = "Grade da turma limpa.";
+        return RedirectToAction("Index", new { turmaId });
     }
 
 }

@@ -9,6 +9,10 @@ public class GradeViewModel
 
 public class GradeLinhaViewModel
 {
-    public TimeSpan Hora { get; set; }
+    public int SlotAulaId { get; set; }
+    public int Sequencia { get; set; }
+    public TimeSpan HoraInicio { get; set; }
+    public TimeSpan HoraFim { get; set; }
+    public bool EhIntervalo { get; set; }
     public Dictionary<int, GradeHorario?> AulasPorDia { get; set; } = new();
 }

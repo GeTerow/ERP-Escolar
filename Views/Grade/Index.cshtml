@@ -1,4 +1,8 @@
 @model TaskWeb.Models.GradeViewModel
+@{
+    var success = TempData["Success"] as string;
+    var error = TempData["Error"] as string;
+}
 
 <html>
     <head>
@@ -12,14 +16,18 @@
     <body class="bg-light">
         <div class="container py-4">
             <div class="card shadow-sm page-card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h1 class="h5 mb-0">Grade Semanal</h1>
+                <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                    <h1 class="h5 mb-0">Grade semanal</h1>
                     <a class="btn btn-outline-secondary btn-sm" href="/home">Voltar</a>
                 </div>
                 <div class="card-body">
-                    @if (ViewBag.Mensagem != null)
+                    @if (!string.IsNullOrEmpty(success))
                     {
-                        <div class="alert alert-info">@ViewBag.Mensagem</div>
+                        <div class="alert alert-success">@success</div>
+                    }
+                    @if (!string.IsNullOrEmpty(error))
+                    {
+                        <div class="alert alert-danger">@error</div>
                     }
 
                     @if (Model.Turmas.Count == 0)
@@ -40,10 +48,15 @@
                                     </select>
                                 </form>
                             </div>
-                            <div class="col-md-8">
-                                <div class="alert alert-secondary mb-0">
-                                    Demonstração da grade semanal.
-                                </div>
+                            <div class="col-md-8 d-flex justify-content-end gap-2">
+                                <form action="/grade/gerar" method="POST" class="d-flex gap-2">
+                                    <input type="hidden" name="turmaId" value="@Model.TurmaSelecionadaId" />
+                                    <button class="btn btn-success"><i class="bi bi-magic me-1"></i>Gerar automaticamente</button>
+                                </form>
+                                <form action="/grade/limpar" method="POST" onsubmit="return confirm('Tem certeza que deseja limpar a grade?');">
+                                    <input type="hidden" name="turmaId" value="@Model.TurmaSelecionadaId" />
+                                    <button class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Limpar grade</button>
+                                </form>
                             </div>
                         </div>
 
@@ -52,9 +65,9 @@
                             <table class="table table-bordered align-middle text-center mb-0 grade-table">
                                 <thead class="table-light">
                                     <tr>
-                                        <th style="width: 10%;">Horário</th>
+                                        <th style="width: 10%;">Horario</th>
                                         <th>Segunda</th>
-                                        <th>Terça</th>
+                                        <th>Terca</th>
                                         <th>Quarta</th>
                                         <th>Quinta</th>
                                         <th>Sexta</th>
@@ -63,8 +76,14 @@
                                 <tbody>
                                     @foreach (var linha in Model.Linhas)
                                     {
-                                        <tr>
-                                            <td>@linha.Hora.ToString(@"hh\:mm")</td>
+                                        <tr class="@(linha.EhIntervalo ? "table-light" : string.Empty)">
+                                            <td class="text-start">
+                                                <div>@($"{linha.HoraInicio:hh\\:mm} - {linha.HoraFim:hh\\:mm}")</div>
+                                                @if (linha.EhIntervalo)
+                                                {
+                                                    <small class="text-muted">Intervalo</small>
+                                                }
+                                            </td>
                                             @for (int dia = 1; dia <= 5; dia++)
                                             {
                                                 var aula = linha.AulasPorDia.ContainsKey(dia) ? linha.AulasPorDia[dia] : null;
@@ -98,10 +117,11 @@
                 if (!col) return;
                 document.querySelectorAll('.grade-table tr').forEach(function(tr){
                   var cells = tr.children;
-                  if (cells && cells[col]) { cells[col-1].classList.add('grade-col-today'); }
+                  if (cells && cells[col-1]) { cells[col-1].classList.add('grade-col-today'); }
                 });
               } catch (e) { /* noop */ }
             })();
         </script>
     </body>
 </html>
+

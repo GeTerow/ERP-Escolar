@@ -38,14 +38,15 @@
                             <tr>
                                 <th>Nome</th>
                                 <th>Ano Letivo</th>
-                                <th style="width: 140px;">Ações</th>
+                                <th>Turno</th>
+                                <th style="width: 160px;">Acoes</th>
                             </tr>
                         </thead>
                         <tbody>
                             @if (Model.Count == 0)
                             {
                                 <tr>
-                                    <td colspan="3" class="text-center text-muted">Nenhuma turma cadastrada.</td>
+                                    <td colspan="4" class="text-center text-muted">Nenhuma turma cadastrada.</td>
                                 </tr>
                             }
                             else
@@ -55,6 +56,7 @@
                                     <tr>
                                         <td>@turma.Nome</td>
                                         <td>@(string.IsNullOrEmpty(turma.AnoLetivo) ? "-" : turma.AnoLetivo)</td>
+                                        <td>@(string.IsNullOrEmpty(turma.TurnoNome) ? "-" : turma.TurnoNome)</td>
                                         <td>
                                             <a class="btn btn-outline-primary btn-sm me-2" href="/turmas/edit/@turma.TurmaId">Editar</a>
                                             <a class="btn btn-outline-danger btn-sm" href="/turmas/delete/@turma.TurmaId">Excluir</a>

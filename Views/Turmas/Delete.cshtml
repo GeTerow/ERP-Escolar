@@ -23,6 +23,8 @@
                     <dl class="row">
                         <dt class="col-sm-3">Ano Letivo</dt>
                         <dd class="col-sm-9">@(!string.IsNullOrEmpty(Model.AnoLetivo) ? Model.AnoLetivo : "-")</dd>
+                        <dt class="col-sm-3">Turno</dt>
+                        <dd class="col-sm-9">@(!string.IsNullOrEmpty(Model.TurnoNome) ? Model.TurnoNome : "-")</dd>
                     </dl>
                     <form action="/turmas/delete" method="POST" class="d-flex gap-2">
                         <input type="hidden" name="id" value="@Model.TurmaId" />

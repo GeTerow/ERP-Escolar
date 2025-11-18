@@ -6,7 +6,10 @@ public class GradeHorario
     public int TurmaId { get; set; }
     public int MateriaId { get; set; }
     public int ProfessorId { get; set; }
+    public int SlotAulaId { get; set; }
     public int DiaSemana { get; set; }
+    public int SlotSequencia { get; set; }
+    public bool SlotEhIntervalo { get; set; }
     public TimeSpan HoraInicio { get; set; }
     public TimeSpan HoraFim { get; set; }
 

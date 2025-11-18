@@ -1,4 +1,7 @@
 @model TaskWeb.Models.Turma
+@{
+    var turnos = ViewBag.Turnos as List<TaskWeb.Models.Turno> ?? new List<TaskWeb.Models.Turno>();
+}
 
 <html>
     <head>
@@ -24,13 +27,23 @@
 
                     <form action="/turmas/edit" method="POST" class="row g-3">
                         <input type="hidden" name="TurmaId" value="@Model.TurmaId" />
-                        <div class="col-md-6">
+                        <div class="col-md-5">
                             <label class="form-label">Nome</label>
                             <input name="Nome" class="form-control" value="@Model.Nome" />
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <label class="form-label">Ano Letivo</label>
                             <input name="AnoLetivo" class="form-control" value="@Model.AnoLetivo" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Turno</label>
+                            <select name="TurnoId" class="form-select">
+                                <option value="">Selecione...</option>
+                                @foreach (var turno in turnos)
+                                {
+                                    <option value="@turno.TurnoId" @(turno.TurnoId == Model.TurnoId ? "selected" : string.Empty)>@turno.Nome</option>
+                                }
+                            </select>
                         </div>
                         <div class="col-12 d-flex gap-2">
                             <button class="btn btn-success"><i class="bi bi-check2-circle me-1"></i>Salvar</button>
