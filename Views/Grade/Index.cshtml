@@ -53,6 +53,10 @@
                                     <input type="hidden" name="turmaId" value="@Model.TurmaSelecionadaId" />
                                     <button class="btn btn-success"><i class="bi bi-magic me-1"></i>Gerar automaticamente</button>
                                 </form>
+                                <form action="/grade/limpar" method="POST" onsubmit="return confirm('Tem certeza que deseja limpar a grade?');">
+                                    <input type="hidden" name="turmaId" value="@Model.TurmaSelecionadaId" />
+                                    <button class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Limpar grade</button>
+                                </form>
                             </div>
                         </div>
 

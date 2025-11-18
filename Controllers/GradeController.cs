@@ -99,4 +99,25 @@ public class GradeController : BaseController
 
         return RedirectToAction("Index", new { turmaId });
     }
+
+    [HttpPost]
+    public IActionResult Limpar(int turmaId)
+    {
+        if (!UsuarioLogado())
+        {
+            return RedirectToAction("Login", "Usuario");
+        }
+
+        var turma = _turmaRepository.Read(turmaId);
+        if (turma == null)
+        {
+            TempData["Error"] = "Turma nao encontrada.";
+            return RedirectToAction("Index");
+        }
+
+        _gradeRepository.DeleteByTurma(turmaId);
+        TempData["Success"] = "Grade da turma limpa.";
+        return RedirectToAction("Index", new { turmaId });
+    }
+
 }
