@@ -7,9 +7,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddTransient<IUsuarioRepository>(_ => 
     new UsuarioDatabaseRepository(
         builder.Configuration.GetConnectionString("default")));
-builder.Services.AddTransient<IAlunoRepository>(_ => 
-    new AlunoDatabaseRepository(
-        builder.Configuration.GetConnectionString("default")));
 builder.Services.AddTransient<IProfessorRepository>(_ => 
     new ProfessorDatabaseRepository(
         builder.Configuration.GetConnectionString("default")));

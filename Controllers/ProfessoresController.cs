@@ -10,6 +10,8 @@ public class ProfessoresController : BaseController
     private readonly IProfessorRepository _professorRepository;
     private readonly ISlotAulaRepository _slotRepository;
     private readonly IDisponibilidadeProfessorRepository _disponibilidadeRepository;
+    private readonly IGradeRepository _gradeRepository;
+
     private static readonly DiaSemanaOption[] _diasSemana = new[]
     {
         new DiaSemanaOption { Valor = 1, Nome = "Segunda" },
@@ -22,11 +24,13 @@ public class ProfessoresController : BaseController
     public ProfessoresController(
         IProfessorRepository professorRepository,
         ISlotAulaRepository slotRepository,
-        IDisponibilidadeProfessorRepository disponibilidadeRepository)
+        IDisponibilidadeProfessorRepository disponibilidadeRepository,
+        IGradeRepository gradeRepository)
     {
         _professorRepository = professorRepository;
         _slotRepository = slotRepository;
         _disponibilidadeRepository = disponibilidadeRepository;
+        _gradeRepository = gradeRepository;
     }
 
     public IActionResult Index()
@@ -267,5 +271,25 @@ public class ProfessoresController : BaseController
 
         TempData["Success"] = "Disponibilidade atualizada.";
         return RedirectToAction("Disponibilidade", new { id = input.ProfessorId });
+    }
+
+    [HttpGet]
+    public IActionResult AcessoRapido(int? professorId)
+    {
+        if (!UsuarioLogado()) return RedirectToAction("Login", "Usuario");
+
+        ViewBag.Professores = _professorRepository.ReadAll();
+        ViewBag.ProfessorSelecionadoId = professorId;
+
+        List<GradeHorario> aulas = new();
+
+        if (professorId.HasValue)
+        {
+            aulas = _gradeRepository.ReadByProfessor(professorId.Value);
+
+            aulas = aulas.OrderBy(a => a.DiaSemana).ThenBy(a => a.HoraInicio).ToList();
+        }
+
+        return View(aulas);
     }
 }

@@ -2,6 +2,7 @@ namespace TaskWeb.Services;
 
 using TaskWeb.Models;
 using TaskWeb.Repositories;
+using System.Linq;
 
 public class GradeGenerationService
 {
@@ -32,14 +33,14 @@ public class GradeGenerationService
         var turma = _turmaRepository.Read(turmaId);
         if (turma == null)
         {
-            result.AddError("Turma nao encontrada.");
+            result.AddError("Turma não encontrada.");
             return result;
         }
 
         var materias = _materiaRepository.ReadByTurma(turmaId);
         if (materias.Count == 0)
         {
-            result.AddError("Cadastre materias para a turma antes de gerar a grade.");
+            result.AddError("Cadastre matérias para a turma antes de gerar a grade.");
             return result;
         }
 
@@ -49,7 +50,7 @@ public class GradeGenerationService
             .ToList();
         if (slots.Count == 0)
         {
-            result.AddError("Nao existem slots cadastrados para o turno da turma.");
+            result.AddError("Não existem slots cadastrados para o turno da turma.");
             return result;
         }
 
@@ -68,7 +69,10 @@ public class GradeGenerationService
         foreach (var materia in alocacoes)
         {
             bool alocada = false;
+            HashSet<string> motivosDeFalha = new(); 
+
             var orderedDias = RotateDias(dias, alocacaoIndex);
+            
             foreach (var dia in orderedDias)
             {
                 foreach (var slot in slots)
@@ -80,6 +84,7 @@ public class GradeGenerationService
 
                     if (professorOcupacao.TryGetValue(materia.ProfessorId, out var profSlots) && profSlots.Contains((dia, slot.SlotAulaId)))
                     {
+                        motivosDeFalha.Add($"Professor {materia.ProfessorNome} já tem aula neste horário");
                         continue;
                     }
 
@@ -100,48 +105,55 @@ public class GradeGenerationService
                     };
 
                     var validation = _validationService.Validate(novoHorario, null, snapshot);
+                    
                     if (validation.Success)
                     {
                         snapshot.Add(novoHorario);
                         turmaOcupacao.Add((dia, slot.SlotAulaId));
+                        
                         if (!professorOcupacao.TryGetValue(materia.ProfessorId, out var slotsProfessor))
                         {
                             slotsProfessor = new HashSet<(int, int)>();
                             professorOcupacao[materia.ProfessorId] = slotsProfessor;
                         }
                         slotsProfessor.Add((dia, slot.SlotAulaId));
+                        
                         alocada = true;
                         break;
                     }
+                    else
+                    {
+                        foreach(var erro in validation.Errors) motivosDeFalha.Add(erro);
+                    }
                 }
 
-                if (alocada)
-                {
-                    break;
-                }
+                if (alocada) break;
             }
 
             if (!alocada)
             {
-                result.AddError($"Nao foi possivel alocar todas as aulas da materia {materia.Nome}.");
-                break;
+                string detalhes = motivosDeFalha.Count > 0 
+                    ? string.Join("; ", motivosDeFalha) 
+                    : "Sem horários vagos ou conflito geral.";
+                result.AddError($"Falha ao alocar {materia.Nome}: {detalhes}");
             }
 
             alocacaoIndex++;
         }
-
-        if (result.Errors.Count > 0)
+        if (snapshot.Count > 0)
         {
-            return result;
+            _gradeRepository.DeleteByTurma(turmaId);
+            foreach (var horario in snapshot)
+            {
+                _gradeRepository.Create(horario);
+            }
+            result.HorariosGerados.AddRange(_gradeRepository.ReadByTurma(turmaId));
+        }
+        else if (result.Errors.Count == 0)
+        {
+            result.AddError("Não foi possível gerar nenhuma aula com os parâmetros atuais.");
         }
 
-        _gradeRepository.DeleteByTurma(turmaId);
-        foreach (var horario in snapshot)
-        {
-            _gradeRepository.Create(horario);
-        }
-
-        result.HorariosGerados.AddRange(_gradeRepository.ReadByTurma(turmaId));
         return result;
     }
 
