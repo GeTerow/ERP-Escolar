@@ -1,127 +1,342 @@
 @model TaskWeb.Models.GradeViewModel
 @{
+    ViewData["Title"] = "Grade Curricular";
     var success = TempData["Success"] as string;
     var error = TempData["Error"] as string;
+    var nomeUsuario = Context.Session.GetString("Nome") ?? "Usuário";
+    var primeiroNome = nomeUsuario.Split(' ')[0];
+
+    // Função para gerar cores consistentes baseadas no nome da matéria
+    string GetMateriaColor(string materia) {
+        if (string.IsNullOrEmpty(materia)) return "gray";
+        int hash = Math.Abs(materia.GetHashCode());
+        var colors = new[] { "blue", "indigo", "purple", "pink", "teal", "orange", "cyan" };
+        return colors[hash % colors.Length];
+    }
+
+    // Identificar dia da semana atual para destaque (1=Seg, 5=Sex)
+    int diaHoje = (int)DateTime.Now.DayOfWeek;
 }
 
-<html>
-    <head>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
-        <link href="/css/app.css" rel="stylesheet" />
-    </head>
-    <body class="bg-light">
-        <div class="container py-4">
-            <div class="card shadow-sm page-card">
-                <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
-                    <h1 class="h5 mb-0">Grade semanal</h1>
-                    <a class="btn btn-outline-secondary btn-sm" href="/home">Voltar</a>
-                </div>
-                <div class="card-body">
-                    @if (!string.IsNullOrEmpty(success))
-                    {
-                        <div class="alert alert-success">@success</div>
-                    }
-                    @if (!string.IsNullOrEmpty(error))
-                    {
-                        <div class="alert alert-danger">@error</div>
-                    }
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/css/app.css" rel="stylesheet" />
+    <style>
+        /* Estilo Planner */
+        .planner-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
 
-                    @if (Model.Turmas.Count == 0)
-                    {
-                        <div class="alert alert-warning mb-0">Cadastre turmas para visualizar a grade.</div>
-                    }
-                    else
-                    {
-                        <div class="row g-3 align-items-end mb-3">
-                            <div class="col-md-4">
-                                <form action="/grade" method="GET">
-                                    <label class="form-label">Turma</label>
-                                    <select name="turmaId" class="form-select" onchange="this.form.submit()">
-                                        @foreach (var turma in Model.Turmas)
-                                        {
-                                            <option value="@turma.TurmaId" @(turma.TurmaId == Model.TurmaSelecionadaId ? "selected" : string.Empty)>@turma.Nome</option>
-                                        }
-                                    </select>
-                                </form>
-                            </div>
-                            <div class="col-md-8 d-flex justify-content-end gap-2">
-                                <form action="/grade/gerar" method="POST" class="d-flex gap-2">
-                                    <input type="hidden" name="turmaId" value="@Model.TurmaSelecionadaId" />
-                                    <button class="btn btn-success"><i class="bi bi-magic me-1"></i>Gerar automaticamente</button>
-                                </form>
-                                <form action="/grade/limpar" method="POST" onsubmit="return confirm('Tem certeza que deseja limpar a grade?');">
-                                    <input type="hidden" name="turmaId" value="@Model.TurmaSelecionadaId" />
-                                    <button class="btn btn-outline-danger"><i class="bi bi-trash me-1"></i>Limpar grade</button>
-                                </form>
-                            </div>
-                        </div>
+        .navbar {
+            background-color: #ffffff;
+            border-bottom: 1px solid var(--card-border);
+            padding: 0.75rem 0;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+        
+        .navbar-brand {
+            font-weight: 700;
+            color: #4f46e5 !important;
+            font-size: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
 
-                        <div class="border rounded">
-                            <div class="table-responsive">
-                            <table class="table table-bordered align-middle text-center mb-0 grade-table">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th style="width: 10%;">Horario</th>
-                                        <th>Segunda</th>
-                                        <th>Terca</th>
-                                        <th>Quarta</th>
-                                        <th>Quinta</th>
-                                        <th>Sexta</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var linha in Model.Linhas)
-                                    {
-                                        <tr class="@(linha.EhIntervalo ? "table-light" : string.Empty)">
-                                            <td class="text-start">
-                                                <div>@($"{linha.HoraInicio:hh\\:mm} - {linha.HoraFim:hh\\:mm}")</div>
-                                                @if (linha.EhIntervalo)
-                                                {
-                                                    <small class="text-muted">Intervalo</small>
-                                                }
-                                            </td>
-                                            @for (int dia = 1; dia <= 5; dia++)
-                                            {
-                                                var aula = linha.AulasPorDia.ContainsKey(dia) ? linha.AulasPorDia[dia] : null;
-                                                if (aula != null)
-                                                {
-                                                    <td>
-                                                        <strong>@aula.MateriaNome</strong><br />
-                                                        <small>@aula.ProfessorNome</small>
-                                                    </td>
-                                                }
-                                                else
-                                                {
-                                                    <td class="text-muted">-</td>
-                                                }
-                                            }
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
-                            </div>
-                        </div>
-                    }
+        .planner-header {
+            background-color: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .day-header {
+            text-align: center;
+            padding: 1rem 0.5rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+            border-left: 1px solid #f1f5f9;
+        }
+        
+        .day-header.today {
+            background-color: #eef2ff;
+            color: #4f46e5;
+            border-bottom: 3px solid #4f46e5;
+        }
+
+        .time-col {
+            width: 100px;
+            text-align: center;
+            vertical-align: middle;
+            font-size: 0.8rem;
+            color: #94a3b8;
+            font-weight: 600;
+            background-color: #fff;
+            border-right: 1px solid #e2e8f0;
+            padding: 1rem 0;
+        }
+
+        .planner-cell {
+            vertical-align: top;
+            padding: 0.5rem;
+            height: 100px; /* Altura mínima para o bloco */
+            border-left: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.2s;
+        }
+        
+        .planner-cell:hover {
+            background-color: #fafafa;
+        }
+
+        /* Cards de Aula (Eventos) */
+        .event-card {
+            border-radius: 8px;
+            padding: 0.6rem 0.8rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            font-size: 0.9rem;
+            border-left: 4px solid rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            transition: transform 0.2s;
+        }
+        .event-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .event-title {
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            line-height: 1.2;
+        }
+        .event-prof {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* Cores dos Eventos */
+        .evt-blue { background-color: #eff6ff; color: #1e40af; border-left-color: #3b82f6; }
+        .evt-indigo { background-color: #eef2ff; color: #3730a3; border-left-color: #6366f1; }
+        .evt-purple { background-color: #f5f3ff; color: #5b21b6; border-left-color: #8b5cf6; }
+        .evt-pink { background-color: #fdf2f8; color: #9d174d; border-left-color: #ec4899; }
+        .evt-teal { background-color: #f0fdfa; color: #115e59; border-left-color: #14b8a6; }
+        .evt-orange { background-color: #fff7ed; color: #9a3412; border-left-color: #f97316; }
+        .evt-cyan { background-color: #ecfeff; color: #155e75; border-left-color: #06b6d4; }
+        .evt-gray { background-color: #f8fafc; color: #475569; border-left-color: #94a3b8; }
+
+        /* Linha de Intervalo */
+        .interval-row td {
+            background-color: #f8fafc;
+            height: 40px;
+            padding: 0;
+            vertical-align: middle;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .interval-badge {
+            background-color: #e2e8f0;
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0.3rem 1rem;
+            border-radius: 99px;
+            display: inline-block;
+        }
+
+        /* Empty State dentro da grade */
+        .empty-slot {
+            color: #e2e8f0;
+            text-align: center;
+            padding-top: 1.5rem;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <nav class="navbar sticky-top mb-5">
+        <div class="container">
+            <a class="navbar-brand" href="/home">
+                <i class="bi bi-grid-1x2-fill"></i>
+                Sistema de Grade
+            </a>
+            
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-none d-sm-block text-muted small">
+                    Olá, <strong>@primeiroNome</strong>
                 </div>
+                <a href="/usuario/logout" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                    Sair
+                </a>
             </div>
         </div>
-        <script>
-            (function() {
-              try {
-                var day = new Date().getDay(); // 0-6 (Sun-Sat)
-                var col = {1: 2, 2: 3, 3: 4, 4: 5, 5: 6}[day];
-                if (!col) return;
-                document.querySelectorAll('.grade-table tr').forEach(function(tr){
-                  var cells = tr.children;
-                  if (cells && cells[col-1]) { cells[col-1].classList.add('grade-col-today'); }
-                });
-              } catch (e) { /* noop */ }
-            })();
-        </script>
-    </body>
-</html>
+    </nav>
+    <div class="container py-5">
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="h3 fw-bold text-dark mb-1">Grade Curricular</h1>
+                <p class="text-muted mb-0">Planejamento semanal de aulas.</p>
+            </div>
+            <a href="/home" class="btn btn-outline-secondary btn-sm px-3 rounded-pill">
+                <i class="bi bi-arrow-left me-1"></i> Voltar
+            </a>
+        </div>
 
+        @if (!string.IsNullOrEmpty(success))
+        {
+            <div class="alert alert-success d-flex align-items-center shadow-sm border-0 rounded-3 mb-4">
+                <i class="bi bi-check-circle-fill me-2 fs-5"></i> <div>@success</div>
+            </div>
+        }
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger d-flex align-items-center shadow-sm border-0 rounded-3 mb-4">
+                <i class="bi bi-exclamation-triangle-fill me-2 fs-5"></i> <div>@error</div>
+            </div>
+        }
+
+        <div class="card border-0 shadow-sm rounded-4 mb-4 p-3">
+            @if (Model.Turmas.Count == 0)
+            {
+                <div class="text-center py-3">
+                    <p class="text-muted mb-2">Nenhuma turma cadastrada.</p>
+                    <a href="/turmas/create" class="btn btn-primary btn-sm">Cadastrar Turma</a>
+                </div>
+            }
+            else
+            {
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <form action="/grade" method="GET">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Selecionar Turma</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white border-end-0"><i class="bi bi-people"></i></span>
+                                <select name="turmaId" class="form-select border-start-0" onchange="this.form.submit()">
+                                    @foreach (var turma in Model.Turmas)
+                                    {
+                                        <option value="@turma.TurmaId" selected="@(turma.TurmaId == Model.TurmaSelecionadaId)">@turma.Nome</option>
+                                    }
+                                </select>
+                            </div>
+                        </form>
+                    </div>
+                    
+                    <div class="col-md-8 d-flex justify-content-md-end gap-2">
+                        <form action="/grade/gerar" method="POST">
+                            <input type="hidden" name="turmaId" value="@Model.TurmaSelecionadaId" />
+                            <button class="btn btn-primary fw-semibold">
+                                <i class="bi bi-magic me-2"></i>Gerar Automaticamente
+                            </button>
+                        </form>
+                        
+                        <form action="/grade/limpar" method="POST" onsubmit="return confirm('Tem certeza que deseja limpar toda a grade desta turma?');">
+                            <input type="hidden" name="turmaId" value="@Model.TurmaSelecionadaId" />
+                            <button class="btn btn-outline-danger">
+                                <i class="bi bi-trash me-2"></i>Limpar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (Model.Turmas.Count > 0 && Model.Linhas.Count > 0)
+        {
+            <div class="planner-container">
+                <table class="w-100" style="border-collapse: collapse;">
+                    <thead class="planner-header">
+                        <tr>
+                            <th class="time-col border-bottom-0"></th> @for (int i = 1; i <= 5; i++)
+                            {
+                                string nomeDia = i switch { 1=>"Segunda", 2=>"Terça", 3=>"Quarta", 4=>"Quinta", 5=>"Sexta", _=>"" };
+                                string classeHoje = (i == diaHoje) ? "today" : "";
+                                <th class="day-header @classeHoje">
+                                    @nomeDia
+                                    @if(i == diaHoje) { <i class="bi bi-circle-fill text-primary ms-1" style="font-size: 0.5rem; vertical-align: middle;"></i> }
+                                </th>
+                            }
+                        </tr>
+                    </thead>
+                    
+                    <tbody>
+                        @foreach (var linha in Model.Linhas)
+                        {
+                            if (linha.EhIntervalo)
+                            {
+                                <tr class="interval-row">
+                                    <td class="time-col">
+                                        <div>@linha.HoraInicio.ToString("hh\\:mm")</div>
+                                        <div style="font-size: 0.7rem; opacity: 0.7;">@linha.HoraFim.ToString("hh\\:mm")</div>
+                                    </td>
+                                    <td colspan="5" class="text-center">
+                                        <span class="interval-badge"><i class="bi bi-cup-hot me-2"></i>Intervalo</span>
+                                    </td>
+                                </tr>
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td class="time-col">
+                                        <div>@linha.HoraInicio.ToString("hh\\:mm")</div>
+                                        <div style="font-size: 0.7rem; opacity: 0.7;">@linha.HoraFim.ToString("hh\\:mm")</div>
+                                    </td>
+
+                                    @for (int dia = 1; dia <= 5; dia++)
+                                    {
+                                        var aula = linha.AulasPorDia.ContainsKey(dia) ? linha.AulasPorDia[dia] : null;
+                                        
+                                        <td class="planner-cell">
+                                            @if (aula != null)
+                                            {
+                                                var cor = GetMateriaColor(aula.MateriaNome);
+                                                <div class="event-card evt-@cor">
+                                                    <div class="event-title">@aula.MateriaNome</div>
+                                                    <div class="event-prof">
+                                                        <i class="bi bi-person-circle me-1"></i> @aula.ProfessorNome
+                                                    </div>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="empty-slot">
+                                                    <i class="bi bi-dash-lg"></i>
+                                                </div>
+                                            }
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else if (Model.Turmas.Count > 0)
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-calendar-x fs-1"></i>
+                <p class="mt-3">Nenhum horário configurado para o turno desta turma.</p>
+            </div>
+        }
+
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

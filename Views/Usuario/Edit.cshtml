@@ -1,7 +1,7 @@
-@model TaskWeb.Models.Professor
+@model TaskWeb.Models.Usuario
 
 @{
-    ViewData["Title"] = "Novo Professor";
+    ViewData["Title"] = "Editar Usuário";
 }
 
 <!DOCTYPE html>
@@ -16,19 +16,29 @@
             border: none;
             border-radius: 16px;
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            border-top: 5px solid #4f46e5;
+            border-top: 5px solid #14b8a6;
         }
         .icon-header {
             width: 60px;
             height: 60px;
-            background-color: #eef2ff;
-            color: #4f46e5;
+            background-color: #f0fdfa;
+            color: #14b8a6;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
             margin: 0 auto 1.5rem auto;
+        }
+        .btn-teal {
+            background-color: #14b8a6;
+            border-color: #14b8a6;
+            color: white;
+        }
+        .btn-teal:hover {
+            background-color: #0d9488;
+            border-color: #0d9488;
+            color: white;
         }
     </style>
 </head>
@@ -39,8 +49,8 @@
             <div class="col-md-8 col-lg-6">
                 
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h1 class="h4 fw-bold text-dark mb-0">Novo Cadastro</h1>
-                    <a href="/professores" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
+                    <h1 class="h4 fw-bold text-dark mb-0">Editar Usuário</h1>
+                    <a href="/usuario/index" class="btn btn-outline-secondary btn-sm rounded-pill px-3">
                         <i class="bi bi-arrow-left me-1"></i> Voltar
                     </a>
                 </div>
@@ -50,10 +60,10 @@
                         
                         <div class="text-center mb-4">
                             <div class="icon-header">
-                                <i class="bi bi-person-plus-fill"></i>
+                                <i class="bi bi-person-gear"></i>
                             </div>
-                            <h5 class="fw-bold">Adicionar Professor</h5>
-                            <p class="text-muted small">Preencha os dados abaixo para cadastrar.</p>
+                            <h5 class="fw-bold">Atualizar Dados</h5>
+                            <span class="badge bg-light text-secondary border">ID: @Model.UsuarioId</span>
                         </div>
 
                         @if (ViewBag.Error != null)
@@ -64,28 +74,29 @@
                             </div>
                         }
 
-                        <form action="/professores/create" method="POST">
-                            
+                        <form action="/usuario/edit" method="POST">
+                            <input type="hidden" name="UsuarioId" value="@Model.UsuarioId" />
+
                             <div class="form-floating mb-3">
-                                <input name="Nome" class="form-control" id="nomeInput" placeholder="Nome Completo" value="@Model.Nome" required />
+                                <input name="Nome" class="form-control" id="nomeInput" placeholder="Nome" value="@Model.Nome" required />
                                 <label for="nomeInput">Nome Completo</label>
                             </div>
 
                             <div class="form-floating mb-3">
-                                <input name="Email" type="email" class="form-control" id="emailInput" placeholder="nome@escola.com" value="@Model.Email" required />
-                                <label for="emailInput">Endereço de Email</label>
+                                <input name="Email" type="email" class="form-control" id="emailInput" placeholder="Email" value="@Model.Email" required />
+                                <label for="emailInput">Email de Login</label>
                             </div>
 
                             <div class="form-floating mb-4">
-                                <input name="Telefone" class="form-control" id="telInput" placeholder="(00) 00000-0000" value="@Model.Telefone" required />
-                                <label for="telInput">Telefone / Celular</label>
+                                <input name="Senha" type="text" class="form-control" id="senhaInput" placeholder="Senha" value="@Model.Senha" />
+                                <label for="senhaInput">Senha (Altere se desejar)</label>
                             </div>
 
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary btn-lg rounded-3 fw-semibold">
-                                    <i class="bi bi-check2-circle me-2"></i>Cadastrar Professor
+                                <button type="submit" class="btn btn-teal btn-lg rounded-3 fw-semibold">
+                                    <i class="bi bi-check2-circle me-2"></i>Salvar Alterações
                                 </button>
-                                <a href="/professores" class="btn btn-light text-muted fw-semibold mt-2">Cancelar</a>
+                                <a href="/usuario/index" class="btn btn-light text-muted fw-semibold mt-2">Cancelar</a>
                             </div>
                         </form>
 

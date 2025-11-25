@@ -1,6 +1,7 @@
 namespace TaskWeb.Services;
 
 using TaskWeb.Models;
+using System.Collections.Generic;
 
 public class GradeGenerationResult
 {
@@ -11,7 +12,7 @@ public class GradeGenerationResult
 
     public void AddError(string message)
     {
-        if (!string.IsNullOrWhiteSpace(message))
+        if (!string.IsNullOrWhiteSpace(message) && !Errors.Contains(message))
         {
             Errors.Add(message);
         }
